@@ -1,3 +1,6 @@
+# お試しver
+[tos-bot](https://discordapp.com/oauth2/authorize?&client_id=339389975848288266&scope=bot&permissions=0)
+
 # 始め方
 
 1. `git clone https://github.com/writ312/tos-bot.git`
