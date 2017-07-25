@@ -1,0 +1,17 @@
+{
+  "name": "tos-bot",
+  "version": "1.0.0",
+  "description": "an descord bot for ToS",
+  "main": "index.js",
+  "dependencies": {
+    "eris": "^0.7.0",
+    "moment": "^2.18.1",
+    "moment-timezone": "^0.5.13"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "writ",
+  "license": "ISC"
+}
