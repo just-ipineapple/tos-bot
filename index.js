@@ -1,54 +1,13 @@
-var botName = 'botの名前'
-var token = 'BOTのトークン'
-
 var Eris = require('eris')
 var fs = require('fs');
-var guessLanguage = require('guessLanguage').guessLanguage;
+var guessLanguage = require('guesslanguage').guessLanguage;
 
 var moment = date => require('moment-timezone')(date).tz('Asia/Tokyo')
-var cubeObj = {};
 
-// 神秘的な箱のセーブデータをロード
-fs.readFile('MysticalCube.json', 'utf8', function (err, data) {
-    if(data)
-        cubeObj = JSON.parse(data);
-    var tempObj = {}
-    for(var name in cubeObj){
-        var user = cubeObj[name]
-        var noticeTime = moment(user.date).diff(moment())
-        console.log(noticeTime)
-        if(noticeTime > 0){
-            setTimeout(name=>{
-                bot.createMessage(user.channelID,  `${user.mention} ${name}さんの箱がもうすぐ開けられます!!`)
-                cubeObj[name] = null
-                fs.writeFile('MysticalCube.json', JSON.stringify(cubeObj, null, '    '));
-            },noticeTime)
-            tempObj[name] = user
-        }
-    }
-    cubeObj = tempObj
-    fs.writeFileSync('MysticalCube.json', JSON.stringify(cubeObj, null, '    '));
-})
-
-//ディルゲレの時間を保存したやつロード
-fs.readFile('Delgele.json', 'utf8', function (err, data) {
-    if(err) return
-    if(data){
-        data =  JSON.parse(data)
-        var ElapsedTime = moment().diff(moment(data.date))
-        var hour = ElapsedTime/1000/60/60
-        if(ElapsedTime > 0 && hour <= 5){
-            if(hour < 2){
-                setTimeout(()=>{
-                    bot.createMessage(data.channelID, `水を与える時間です\n回収時間は${rtnTime(3)}です`);
-                },2 * 60 *  60 * 1000 - ElapsedTime)
-            }
-            setTimeout(()=>{
-                bot.createMessage(data.channelID, '回収時間です。忘れずに回収してください。');
-            },5 *60 * 60  * 1000 - ElapsedTime)    
-        }
-    }
-})
+//------------------bot--------------------
+var token = 'your token name'
+var dbDoc = {}
+dbDoc.alertList = dbDoc.alertList || []
 
 function rtnTime(addHour){
     return moment().add(addHour,'hour').format('HH:mm')
@@ -63,7 +22,6 @@ var bot = new Eris.CommandClient(token, {}, {
 });
 
 bot.on("ready", (msg) => {
-
     console.log("Ready!"); 
 });
 
@@ -87,12 +45,12 @@ bot.registerCommand("search", (msg, args) => {
 });
 
 },{ 
-    description: "Create tos.neet`s url",
+    description: "Create tos.neet`s url.",
     usage: "<text>",
      aliases:["s"]
 });
 
-// 韓国語→日本語に翻訳
+// 外国語→日本語に翻訳
 bot.registerCommand("trans", (msg, args) => { 
     if(args.length === 0) { 
         return "Invalid input";
@@ -102,7 +60,7 @@ bot.registerCommand("trans", (msg, args) => {
       return `https://translate.google.co.jp/translate?sl=auto&tl=ja&js=y&prev=_t&hl=ja&ie=UTF-8&u=${text}&edit-text=&act=url`; 
     return 'https://translate.google.co.jp/#auto/ja/' + text
 }, {
-    description: "translate korean to japanese",
+    description: "translate foforeign language to japanese.",
     usage: "<text>",
     aliases:["t","translate"]
 });
@@ -113,13 +71,18 @@ bot.registerCommand("box", (msg, args) => {
         return "Input your Character Name";
     }
     var text = args.join(" ");
-    var user = {channelID:msg.channel.id,mention:`<@${msg.author.id}>`,date:moment().add(24,'hour').add(-3,'minutes')}
+    var user = {
+        type:3,
+        channelID:msg.channel.id,
+        mention:`<@${msg.author.id}>`,
+        date:moment().add(24,'hour').add(-3,'minutes'),
+        text:text
+    }
     bot.createMessage(user.channelID,  `${user.mention} ${moment(user.date).format('HH:mmに')}${text}さんの箱が開けられます`)
-    cubeObj[text] = user
-    setTimeout(()=>{bot.createMessage(user.channelID,  `${user.mention} ${text}さんの箱がもうすぐ開けられます!!`);cubeObj[text] = null},moment(user.date).diff(moment()))
-    fs.writeFile('MysticalCube.json', JSON.stringify(cubeObj, null, '    '));
+    dbDoc.alertList.push(user)
+    // dbUpdate()
     },{
-        description: "translate korean to japanese",
+        description: "Create mystical cube reminder.",
         usage: "<name>",
         aliases:["cube","b"]
 });
@@ -132,17 +95,72 @@ bot.on("messageCreate", (msg) => {
     //         bot.createMessage(msg.channel.id,'https://tos-jp.neet.tv/?q=' + msg.content.replace(/<@.*>\s*/,''))
     // }
     // console.log()
-    console.log(msg.author.id)
-    if(msg.author.username != botName && msg.channel.name == 'delgele'){ //ディルゲレチャンネルならタイマーを起動する
+    if(msg.author.id != bot.user.id && msg.channel.name == 'delgele'){ //ディルゲレチャンネルならタイマーを起動する
         bot.createMessage(msg.channel.id, `ディルゲレを植えました\n種まき・水やり・回収時間は ${rtnTime(0)}->${rtnTime(2)}->${rtnTime(5)}です。`);
-        var obj = {date:moment(),channelID:msg.channel.id}
-        fs.writeFile('Delgele.json', JSON.stringify(obj, null, '    '));
-        setTimeout(()=>{
-            bot.createMessage(msg.channel.id, `水を与える時間です\n回収時間は${rtnTime(3)}です`);
-            setTimeout(()=>{
-                bot.createMessage(msg.channel.id, '回収時間です。忘れずに回収してください。');
-                },3 *60 * 60  * 1000)
-        },2 * 60 * 60 * 1000)
+        dbDoc.alertList.push({
+            type:1,
+            date:moment().add(2,'hour'),
+            channelID:msg.channel.id
+        })
+        dbDoc.alertList.push({
+            type:2,
+            date:moment().add(5,'hour'),
+            channelID:msg.channel.id
+        })
+        // console.log(dbDoc.alertList)
+        // dbUpdate()    
     }
 });
 bot.connect();
+
+//-----------alert-----------
+
+function updateAlert(){
+    let thisTime = moment().format('DD:HH:mm')
+    for(let i in dbDoc.alertList){
+        if(moment(dbDoc.alertList[i].date).format('DD:HH:mm') === thisTime){
+            selectAlertFunc(dbDoc.alertList[i])
+            delete dbDoc.alertList[i]
+        }
+    }
+    dbDoc.alertList = dbDoc.alertList.filter(e=>e)
+}
+
+function selectAlertFunc(obj){
+    switch (obj.type){
+        case 1:{
+            bot.createMessage(obj.channelID, `水を与える時間です\n回収時間は${rtnTime(3)}です`);
+            break
+         }
+        case 2:{
+            bot.createMessage(obj.channelID, '回収時間です。忘れずに回収してください。');
+            break
+        }
+        case 3:{
+            bot.createMessage(obj.channelID,  `${user.mention} ${text}さんの箱がもうすぐ開けられます!!`);
+            break;
+        }
+    }
+}   
+
+var timer = setInterval(updateAlert,1000 * 20)
+
+//---------web page----------
+var express = require('express');
+var app = express();
+
+app.set('port', (process.env.PORT || 5000));
+
+app.use(express.static(__dirname + '/public'));
+
+// views is directory for all template files
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
+app.get('/', function(request, response) {
+  response.render('pages/index');
+});
+
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
+});
