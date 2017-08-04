@@ -34,11 +34,9 @@
 1. `#delgele` #delgeleチャンネルがあるときに、発言すると水やり、回収の時間を教えてくれる。チャンネルで何か発言がトリガー。
 
 # Additional Notes
-08/04/2017
-On Windows,
-npm install on git directory (or extracted zip folder).
-edit index.js
-npm start
+08/04/2017_
+On Windows, npm install on git directory (or extracted zip folder)._
+edit index.js _ npm start
 
 mod index.js :
 `var token='paste_token_bot'`
