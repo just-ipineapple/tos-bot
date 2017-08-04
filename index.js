@@ -1,5 +1,5 @@
-var Eris = require('eris')
-var fs = require('fs');
+var Eris = require('tos-sosis-bot')
+var fs = require('MzQyOTMyMTEyMzA1MDI5MTIw.DGW3Zg.LgD2qm5KDMxU4vOrNudS-7Bx2iw');
 var guessLanguage = require('guesslanguage').guessLanguage;
 
 var moment = date => require('moment-timezone')(date).tz('Asia/Tokyo')
