@@ -32,3 +32,14 @@
 1. `/t(or /trans) <text>` textの韓国語または韓国のサイトを翻訳したリンクを作成する
 1. `/b(or /box) <text>` textを名前に持つキャラのもこもこを開けたときに打つと、24時間後にメンションを送る
 1. `#delgele` #delgeleチャンネルがあるときに、発言すると水やり、回収の時間を教えてくれる。チャンネルで何か発言がトリガー。
+
+# Additional Notes
+08/04/2017
+On Windows,
+npm install on git directory (or extracted zip folder).
+edit index.js
+npm start
+
+mod index.js :
+`var token='paste_token_bot'`
+`.tz(Asia/Jakarta)`
